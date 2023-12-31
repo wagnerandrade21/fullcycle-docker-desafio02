@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: mysql
+    restart: always
+    tty: true
+    environment:
+      # - MYSQL_DATABASE=desafio
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./scripts/001-create-database.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./scripts/002-create-table-people.sql:/docker-entrypoint-initdb.d/2.sql
+    networks:
+      - desafio02
+
+  node:
+    container_name: node
+    image: wagnerandrade21/appnode
+    build:
+      context: node
+      dockerfile: Dockerfile
+    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 30s node index.js     
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+    # ports:
+    #   - "3000:3000"
+    networks:
+      - desafio02
+    depends_on:
+      - mysql
+
+  nginx:
+    container_name: nginx
+    image: wagnerandrade21/nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+    ports:
+      - "8080:80"
+    networks:
+      - desafio02
+    depends_on:
+      - node
+
+
+networks:
+  desafio02:
+    driver: bridge
+
+  
