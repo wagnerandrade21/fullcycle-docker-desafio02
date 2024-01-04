@@ -24,8 +24,8 @@ services:
       context: node
       dockerfile: Dockerfile
     entrypoint: dockerize -wait tcp://mysql:3306 -timeout 30s node index.js     
-    # volumes:
-    #   - ./node:/usr/src/app
+    volumes:
+      - ./node:/usr/src/app
     tty: true
     # ports:
     #   - "3000:3000"
@@ -40,8 +40,8 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    volumes:
-      - ./node:/usr/src/app
+    # volumes:
+    #   - ./node:/usr/src/app
     tty: true
     ports:
       - "8080:80"
